@@ -1,0 +1,25 @@
+{# Kartu tulisan blog — param: post. Dipakai di home & halaman daftar blog. #}
+<article class="card group flex flex-col overflow-hidden">
+  <a href="{% url 'blog:detail' post.slug %}" class="block overflow-hidden">
+    {% if post.cover_image %}
+      <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" width="640" height="360"
+           loading="lazy" decoding="async"
+           class="aspect-video w-full object-cover transition duration-300 group-hover:scale-105" />
+    {% else %}
+      <div class="flex aspect-video w-full items-center justify-center bg-slate-100 font-mono text-sm text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+        // tulisan
+      </div>
+    {% endif %}
+  </a>
+  <div class="flex flex-1 flex-col p-5">
+    <p class="font-mono text-xs text-slate-500 dark:text-slate-400">
+      {% if post.category %}{{ post.category.name }} · {% endif %}{{ post.published_at|date:"j M Y" }}
+    </p>
+    <h3 class="mt-2 text-lg font-bold leading-snug">
+      <a href="{% url 'blog:detail' post.slug %}" class="transition-colors hover:text-sky-600 dark:hover:text-sky-400">
+        {{ post.title }}
+      </a>
+    </h3>
+    <p class="mt-2 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{{ post.excerpt }}</p>
+  </div>
+</article>

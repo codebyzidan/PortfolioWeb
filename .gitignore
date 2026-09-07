@@ -1,0 +1,23 @@
+# Virtual environment
+venv/
+
+# Rahasia
+.env
+
+# Database lokal
+db.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+
+# Media & hasil collectstatic
+media/
+staticfiles/
+
+# Binary Tailwind standalone (diunduh lokal — JANGAN di-commit; app.css hasil build TETAP di-commit)
+tailwindcss
+tailwindcss.exe
+
+# Sistem operasi
+.DS_Store

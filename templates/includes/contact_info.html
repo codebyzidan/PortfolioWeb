@@ -1,0 +1,21 @@
+{# Info kontak dari site_profile (context processor) — dipakai di home & halaman kontak #}
+<dl class="space-y-3 text-sm">
+  {% if site_profile.email %}
+    <div class="flex justify-between gap-4">
+      <dt class="text-slate-500 dark:text-slate-400">Email</dt>
+      <dd><a href="mailto:{{ site_profile.email }}" class="font-medium text-sky-600 hover:underline dark:text-sky-400">{{ site_profile.email }}</a></dd>
+    </div>
+  {% endif %}
+  {% if site_profile.phone %}
+    <div class="flex justify-between gap-4">
+      <dt class="text-slate-500 dark:text-slate-400">Telepon</dt>
+      <dd class="text-end font-medium">{{ site_profile.phone }}</dd>
+    </div>
+  {% endif %}
+  {% if site_profile.location %}
+    <div class="flex justify-between gap-4">
+      <dt class="text-slate-500 dark:text-slate-400">Lokasi</dt>
+      <dd class="text-end font-medium">{{ site_profile.location }}</dd>
+    </div>
+  {% endif %}
+</dl>

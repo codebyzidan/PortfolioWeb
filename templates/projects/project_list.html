@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Projects{% if active_tech %} — {{ active_tech.name }}{% endif %}{% endblock %}
+{% block meta_description %}Koleksi project yang pernah saya bangun{% if active_tech %} dengan {{ active_tech.name }}{% endif %}.{% endblock %}
+
+{% block content %}
+<section class="container-site py-16 sm:py-20">
+  {% include "includes/section_header.html" with label="// projects" title="Semua Projects" description="Koleksi karya dan proyek yang pernah saya bangun — mulai dari aplikasi web hingga eksperimen kecil." %}
+
+  {# Chip filter teknologi (server-side via query param) #}
+  <div class="mt-10 flex flex-wrap items-center gap-2">
+    <a href="{% url 'projects:list' %}"
+       class="rounded-full border px-4 py-1.5 font-mono text-sm transition {% if not active_tech %}border-sky-600 bg-sky-600 text-white dark:border-sky-500 dark:bg-sky-500{% else %}border-slate-300 text-slate-600 hover:border-sky-500 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-400{% endif %}">
+      semua
+    </a>
+    {% for tech in technologies %}
+      <a href="?tech={{ tech.slug }}"
+         class="rounded-full border px-4 py-1.5 font-mono text-sm transition {% if active_tech == tech %}border-sky-600 bg-sky-600 text-white dark:border-sky-500 dark:bg-sky-500{% else %}border-slate-300 text-slate-600 hover:border-sky-500 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-400{% endif %}">
+        {{ tech.name|lower }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {# Grid project #}
+  <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for project in projects %}
+      {% include "includes/project_card.html" with project=project %}
+    {% empty %}
+      <div class="sm:col-span-2 lg:col-span-3">
+        {% if active_tech %}
+          {% include "includes/empty_state.html" with message="Belum ada project dengan teknologi ini." %}
+        {% else %}
+          {% include "includes/empty_state.html" with message="Belum ada project yang dipublikasikan." %}
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  {# Paginasi #}
+  {% if page_obj.has_other_pages %}
+    <nav class="mt-12 flex items-center justify-center gap-4" aria-label="Navigasi halaman">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if active_tech %}&amp;tech={{ active_tech.slug }}{% endif %}" class="btn-secondary">&larr; Sebelumnya</a>
+      {% endif %}
+      <span class="font-mono text-sm text-slate-500 dark:text-slate-400">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if active_tech %}&amp;tech={{ active_tech.slug }}{% endif %}" class="btn-secondary">Berikutnya &rarr;</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{# Kartu project — param: project. Dipakai di home, daftar projects, dan project terkait. #}
+<article class="card group flex flex-col overflow-hidden">
+  <a href="{{ project.get_absolute_url }}" class="block overflow-hidden">
+    {% if project.thumbnail %}
+      <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" width="640" height="360"
+           loading="lazy" decoding="async"
+           class="aspect-video w-full object-cover transition duration-300 group-hover:scale-105" />
+    {% else %}
+      <div class="flex aspect-video w-full items-center justify-center bg-slate-100 font-mono text-sm text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+        // tanpa_gambar
+      </div>
+    {% endif %}
+  </a>
+  <div class="flex flex-1 flex-col p-5">
+    <h3 class="text-lg font-bold leading-snug">
+      <a href="{{ project.get_absolute_url }}" class="transition-colors hover:text-sky-600 dark:hover:text-sky-400">
+        {{ project.title }}
+      </a>
+    </h3>
+    <p class="mt-2 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{{ project.summary }}</p>
+    {% if project.tech_stack.all %}
+      <ul class="mt-4 flex flex-wrap gap-1.5">
+        {% for tech in project.tech_stack.all %}
+          <li class="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ tech.name }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</article>

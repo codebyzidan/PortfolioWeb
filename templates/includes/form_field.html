@@ -1,0 +1,13 @@
+{# Komponen field formulir — param: field (bound field dari form) #}
+<div>
+  <label for="{{ field.id_for_label }}" class="form-label">
+    {{ field.label }}{% if field.field.required %} <span class="text-sky-600 dark:text-sky-400" title="Wajib diisi">*</span>{% endif %}
+  </label>
+  {{ field }}
+  {% if field.help_text %}
+    <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{{ field.help_text }}</p>
+  {% endif %}
+  {% for error in field.errors %}
+    <p class="form-error">{{ error }}</p>
+  {% endfor %}
+</div>

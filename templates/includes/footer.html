@@ -1,0 +1,10 @@
+<footer class="border-t border-slate-200/70 dark:border-slate-800/70">
+  <div class="container-site flex flex-col items-center justify-between gap-3 py-8 text-center sm:flex-row sm:text-left">
+    <a href="{% url 'core:home' %}" class="font-mono text-sm font-bold text-slate-900 dark:text-white">
+      ~/<span class="text-sky-600 dark:text-sky-400">portofolio</span>
+    </a>
+    <p class="text-sm text-slate-500 dark:text-slate-400">
+      © {% now "Y" %} {{ site_profile.full_name }} — Dibangun dengan Django &amp; TailwindCSS.
+    </p>
+  </div>
+</footer>

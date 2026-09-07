@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Blog{% if active_category %} — {{ active_category.name }}{% endif %}{% endblock %}
+{% block meta_description %}Kumpulan tulisan seputar pengalaman belajar dan mengembangkan aplikasi web.{% endblock %}
+
+{% block content %}
+<section class="container-site py-16 sm:py-20">
+  {% include "includes/section_header.html" with label="// blog" title="Tulisan" description="Catatan, tutorial, dan pembelajaran seputar pengembangan web." %}
+
+  {# Filter kategori — mempertahankan filter tag yang sedang aktif #}
+  <div class="mt-10 flex flex-wrap items-center gap-2">
+    <span class="font-mono text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">kategori:</span>
+    <a href="{% url 'blog:list' %}{% if active_tag %}?tag={{ active_tag.slug }}{% endif %}"
+       class="rounded-full border px-4 py-1.5 font-mono text-sm transition {% if not active_category %}border-sky-600 bg-sky-600 text-white dark:border-sky-500 dark:bg-sky-500{% else %}border-slate-300 text-slate-600 hover:border-sky-500 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-400{% endif %}">
+      semua
+    </a>
+    {% for category in categories %}
+      <a href="{% url 'blog:list' %}?kategori={{ category.slug }}{% if active_tag %}&amp;tag={{ active_tag.slug }}{% endif %}"
+         class="rounded-full border px-4 py-1.5 font-mono text-sm transition {% if active_category == category %}border-sky-600 bg-sky-600 text-white dark:border-sky-500 dark:bg-sky-500{% else %}border-slate-300 text-slate-600 hover:border-sky-500 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-400{% endif %}">
+        {{ category.name|lower }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {# Filter tag — mempertahankan filter kategori yang sedang aktif #}
+  {% if tags %}
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="font-mono text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">tag:</span>
+      {% for tag in tags %}
+        <a href="{% url 'blog:list' %}?tag={{ tag.slug }}{% if active_category %}&amp;kategori={{ active_category.slug }}{% endif %}"
+           class="rounded-full border px-4 py-1.5 font-mono text-sm transition {% if active_tag == tag %}border-sky-600 bg-sky-600 text-white dark:border-sky-500 dark:bg-sky-500{% else %}border-slate-300 text-slate-600 hover:border-sky-500 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-400{% endif %}">
+          #{{ tag.name|lower }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Daftar tulisan (format list vertikal, fokus teks) #}
+  <div class="mt-10">
+    {% for post in posts %}
+      <article class="border-b border-slate-200/70 py-8 first:border-t dark:border-slate-800/70">
+        <p class="font-mono text-xs text-slate-500 dark:text-slate-400">
+          {% if post.category %}{{ post.category.name }} · {% endif %}{{ post.published_at|date:"j M Y" }} · {{ post.reading_time }} mnt baca
+        </p>
+        <h2 class="mt-2 text-xl font-bold sm:text-2xl">
+          <a href="{{ post.get_absolute_url }}" class="transition-colors hover:text-sky-600 dark:hover:text-sky-400">
+            {{ post.title }}
+          </a>
+        </h2>
+        <p class="mt-2 max-w-3xl leading-relaxed text-slate-600 dark:text-slate-400">{{ post.excerpt }}</p>
+      </article>
+    {% empty %}
+      {% if active_category or active_tag %}
+        {% include "includes/empty_state.html" with message="Tidak ada tulisan dengan filter ini." %}
+      {% else %}
+        {% include "includes/empty_state.html" with message="Belum ada tulisan yang dipublikasikan." %}
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {# Paginasi — mempertahankan filter yang sedang aktif #}
+  {% if page_obj.has_other_pages %}
+    <nav class="mt-12 flex items-center justify-center gap-4" aria-label="Navigasi halaman">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if active_category %}&amp;kategori={{ active_category.slug }}{% endif %}{% if active_tag %}&amp;tag={{ active_tag.slug }}{% endif %}" class="btn-secondary">&larr; Sebelumnya</a>
+      {% endif %}
+      <span class="font-mono text-sm text-slate-500 dark:text-slate-400">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if active_category %}&amp;kategori={{ active_category.slug }}{% endif %}{% if active_tag %}&amp;tag={{ active_tag.slug }}{% endif %}" class="btn-secondary">Berikutnya &rarr;</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

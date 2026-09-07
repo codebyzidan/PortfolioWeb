@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_profile.full_name }} — Portofolio{% endblock %}
+{% block meta_description %}{{ site_profile.intro }}{% endblock %}
+
+{% block content %}
+
+{# ============================ 0. HERO ============================ #}
+<section class="relative overflow-hidden">
+  <div aria-hidden="true" class="pointer-events-none absolute -top-32 right-0 -z-10 h-96 w-96 rounded-full bg-sky-500/20 blur-3xl"></div>
+  <div class="container-site grid items-center gap-12 py-20 sm:py-24 lg:grid-cols-[1fr_auto]">
+    <div>
+      {% if site_profile.open_to_work %}
+        <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+          </span>
+          Terbuka untuk peluang
+        </span>
+      {% endif %}
+
+      <p class="section-label mt-5">// halo, perkenalkan</p>
+      <h1 class="mt-4 max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+        {{ site_profile.full_name }}
+      </h1>
+      <p class="mt-4 font-mono text-lg text-sky-600 dark:text-sky-400">&gt; {{ site_profile.tagline }}</p>
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+        {{ site_profile.intro }}
+      </p>
+
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a href="#projects" class="btn-primary">Lihat Projects</a>
+        <a href="{% url 'contact:index' %}" class="btn-secondary">Hubungi Saya</a>
+      </div>
+    </div>
+
+    <div class="justify-self-center lg:justify-self-end">
+      {% if site_profile.photo %}
+        <img src="{{ site_profile.photo.url }}" alt="Foto {{ site_profile.full_name }}" width="288" height="288"
+             class="h-56 w-56 rounded-2xl object-cover ring-2 ring-sky-500/60 sm:h-72 sm:w-72" />
+      {% else %}
+        <div class="flex h-56 w-56 items-center justify-center rounded-2xl bg-slate-200 text-6xl font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400 sm:h-72 sm:w-72">
+          {{ site_profile.full_name|first|upper }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{# ========================== 1. TENTANG =========================== #}
+<section id="tentang" class="border-t border-slate-200/70 dark:border-slate-800/70">
+  <div class="container-site py-20">
+    {% include "includes/section_header.html" with label="// 01. tentang_saya" title="Tentang Saya" %}
+    <div class="mt-10 grid gap-10 lg:grid-cols-[2fr_1fr]">
+      <div class="space-y-4 leading-relaxed text-slate-600 dark:text-slate-400">
+        {{ site_profile.about|linebreaks }}
+      </div>
+
+      <aside class="card h-fit p-6">
+        <p class="section-label">// info_cepat</p>
+        <div class="mt-4">
+          {% include "includes/contact_info.html" %}
+        </div>
+
+        {% if site_profile.cv_file %}
+          <a href="{{ site_profile.cv_file.url }}" download class="btn-primary mt-6 w-full">Unduh CV</a>
+        {% endif %}
+
+        <div class="mt-6 border-t border-slate-200 pt-6 dark:border-slate-800">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Media Sosial</p>
+          {% include "includes/social_links.html" with links=site_profile.social_links.all %}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{# ========================== 2. KEAHLIAN ========================== #}
+<section id="keahlian" class="border-t border-slate-200/70 dark:border-slate-800/70">
+  <div class="container-site py-20">
+    {% include "includes/section_header.html" with label="// 02. keahlian" title="Teknologi &amp; Keahlian" description="Tumpuan teknologi yang saya gunakan untuk membangun produk web." %}
+    <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% for category, skills in skill_groups %}
+        <div class="card p-6">
+          <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">{{ category }}</h3>
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {% for skill in skills %}
+              <li class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+                {{ skill.name }}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% empty %}
+        <div class="sm:col-span-2 lg:col-span-3">
+          {% include "includes/empty_state.html" with message="Belum ada data keahlian." %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ========================= 3. PENGALAMAN ========================= #}
+<section id="pengalaman" class="border-t border-slate-200/70 dark:border-slate-800/70">
+  <div class="container-site py-20">
+    {% include "includes/section_header.html" with label="// 03. pengalaman" title="Pengalaman" %}
+    <ol class="relative ms-3 mt-10 border-s-2 border-slate-200 dark:border-slate-800">
+      {% for experience in experiences %}
+        <li class="relative pb-10 ps-8 last:pb-0">
+          <span aria-hidden="true" class="absolute -start-2 top-1 h-4 w-4 rounded-full border-2 border-sky-500 bg-white dark:bg-slate-950"></span>
+          <p class="font-mono text-xs text-slate-500 dark:text-slate-400">{{ experience.period }}</p>
+          <h3 class="mt-1 text-lg font-bold">{{ experience.role }}</h3>
+          <p class="text-sm font-medium text-sky-600 dark:text-sky-400">{{ experience.company }}</p>
+          {% if experience.description %}
+            <div class="mt-2 max-w-2xl space-y-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              {{ experience.description|linebreaks }}
+            </div>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="ps-8">
+          {% include "includes/empty_state.html" with message="Belum ada data pengalaman." %}
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{# =================== 4. PROJECTS UNGGULAN ======================== #}
+<section id="projects" class="border-t border-slate-200/70 dark:border-slate-800/70">
+  <div class="container-site py-20">
+    {% include "includes/section_header.html" with label="// 04. projects" title="Projects Unggulan" %}
+    <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% if featured_projects %}
+        {% for project in featured_projects %}
+          {% include "includes/project_card.html" with project=project %}
+        {% endfor %}
+      {% else %}
+        <div class="sm:col-span-2 lg:col-span-3">
+          {% include "includes/empty_state.html" with message="Belum ada project unggulan." %}
+        </div>
+      {% endif %}
+    </div>
+    {% if featured_projects %}
+      <div class="mt-10 text-center">
+        <a href="{% url 'projects:list' %}" class="btn-secondary">Lihat semua projects &rarr;</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{# ======================= 5. TULISAN TERBARU ====================== #}
+<section id="blog" class="border-t border-slate-200/70 dark:border-slate-800/70">
+  <div class="container-site py-20">
+    {% include "includes/section_header.html" with label="// 05. tulisan" title="Tulisan Terbaru" %}
+    <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% if latest_posts %}
+        {% for post in latest_posts %}
+          {% include "includes/blog_card.html" with post=post %}
+        {% endfor %}
+      {% else %}
+        <div class="sm:col-span-2 lg:col-span-3">
+          {% include "includes/empty_state.html" with message="Belum ada tulisan." %}
+        </div>
+      {% endif %}
+    </div>
+    {% if latest_posts %}
+      <div class="mt-10 text-center">
+        <a href="{% url 'blog:list' %}" class="btn-secondary">Lihat semua tulisan &rarr;</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{# ============================ 6. CTA ============================== #}
+<section id="kontak" class="border-t border-slate-200/70 dark:border-slate-800/70">
+  <div class="container-site py-20">
+    <div class="relative overflow-hidden rounded-2xl bg-sky-600 px-6 py-14 text-center text-white shadow-lg sm:px-16">
+      <div aria-hidden="true" class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"></div>
+      <p class="font-mono text-sm text-sky-100">// 06. kontak</p>
+      <h2 class="mx-auto mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+        Punya ide project? Mari wujudkan bersama.
+      </h2>
+      <p class="mx-auto mt-4 max-w-xl text-sky-100">
+        Saya terbuka untuk peluang kerja, kerja freelance, atau sekadar diskusi seputar teknologi.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a href="{% url 'contact:index' %}"
+           class="inline-flex items-center justify-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-sky-700 shadow-sm transition hover:bg-sky-50">
+          Kirim Pesan
+        </a>
+        {% if site_profile.email %}
+          <a href="mailto:{{ site_profile.email }}"
+             class="inline-flex items-center justify-center rounded-lg border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+            Email Langsung
+          </a>
+        {% endif %}
+      </div>
+      <div class="mt-8 flex justify-center">
+        {% include "includes/social_links.html" with links=site_profile.social_links.all variant="on_accent" %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

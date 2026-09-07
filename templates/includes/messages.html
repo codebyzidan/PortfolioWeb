@@ -1,0 +1,14 @@
+{% if messages %}
+  <div class="container-site mt-6 space-y-3">
+    {% for message in messages %}
+      <div class="alert {% if message.level_tag == 'success' %}alert-success{% elif message.level_tag == 'error' %}alert-error{% elif message.level_tag == 'warning' %}alert-warning{% else %}alert-info{% endif %}" role="alert">
+        <p class="flex-1">{{ message }}</p>
+        <button type="button" data-dismiss-alert aria-label="Tutup pesan" class="shrink-0 rounded p-1 opacity-60 transition hover:opacity-100">
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

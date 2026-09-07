@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Kontak{% endblock %}
+{% block meta_description %}Hubungi saya untuk peluang kerja, proyek freelance, atau sekadar diskusi seputar teknologi.{% endblock %}
+
+{% block content %}
+<section class="container-site py-16 sm:py-20">
+  {% include "includes/section_header.html" with label="// kontak" title="Hubungi Saya" description="Punya penawaran kerja, ide proyek, atau sekadar ingin berdiskusi? Kirim pesan lewat formulir berikut — saya akan membalas via email." %}
+
+  <div class="mt-12 grid gap-10 lg:grid-cols-[3fr_2fr]">
+    {# Kolom formulir #}
+    <div class="card p-6 sm:p-8">
+      {% if form.non_field_errors %}
+        <div class="alert alert-error mb-6" role="alert">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      {# Error time-trap berada pada hidden field, sehingga ditampilkan eksplisit di sini #}
+      {% if form.form_ts.errors %}
+        <div class="alert alert-error mb-6" role="alert">
+          {% for error in form.form_ts.errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'contact:index' %}">
+        {% csrf_token %}
+
+        {# Honeypot anti-spam: harus dibiarkan kosong oleh manusia #}
+        <div aria-hidden="true" class="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+          <label for="id_honeypot">Biarkan kolom ini kosong</label>
+          <input type="text" name="honeypot" id="id_honeypot" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="space-y-5">
+          {% include "includes/form_field.html" with field=form.name %}
+          {% include "includes/form_field.html" with field=form.email %}
+          {% include "includes/form_field.html" with field=form.subject %}
+          {% include "includes/form_field.html" with field=form.message %}
+        </div>
+
+        <button type="submit" class="btn-primary mt-8 w-full">Kirim Pesan</button>
+      </form>
+    </div>
+
+    {# Kolom info #}
+    <aside class="space-y-6">
+      <div class="card p-6">
+        <p class="section-label">// info_kontak</p>
+        <div class="mt-4">
+          {% include "includes/contact_info.html" %}
+        </div>
+        {% if site_profile.open_to_work %}
+          <p class="mt-5 border-t border-slate-200 pt-5 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            Status: <span class="font-medium text-emerald-600 dark:text-emerald-400">terbuka untuk peluang</span>
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="card p-6">
+        <p class="section-label">// media_sosial</p>
+        <div class="mt-4">
+          {% include "includes/social_links.html" with links=site_profile.social_links.all %}
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

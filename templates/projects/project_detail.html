@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} — Projects{% endblock %}
+{% block meta_description %}{{ project.summary }}{% endblock %}
+
+{% block content %}
+<article class="container-site py-12 sm:py-16">
+  <a href="{% url 'projects:list' %}" class="inline-flex items-center gap-1 font-mono text-sm text-sky-600 transition hover:underline dark:text-sky-400">
+    &larr; kembali_ke_projects
+  </a>
+
+  <header class="mt-8 max-w-3xl">
+    <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">{{ project.title }}</h1>
+    <p class="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">{{ project.summary }}</p>
+
+    {% if project.tech_stack.all %}
+      <ul class="mt-6 flex flex-wrap gap-2">
+        {% for tech in project.tech_stack.all %}
+          <li class="rounded-md bg-slate-100 px-2.5 py-1 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ tech.name }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if project.demo_url or project.repo_url %}
+      <div class="mt-8 flex flex-wrap gap-4">
+        {% if project.demo_url %}
+          <a href="{{ project.demo_url }}" target="_blank" rel="noopener noreferrer" class="btn-primary">Demo Live &nearr;</a>
+        {% endif %}
+        {% if project.repo_url %}
+          <a href="{{ project.repo_url }}" target="_blank" rel="noopener noreferrer" class="btn-secondary">Source Code</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </header>
+
+  {% if project.thumbnail %}
+    <img src="{{ project.thumbnail.url }}" alt="Tangkapan layar {{ project.title }}" width="1200" height="675"
+         class="mt-12 w-full rounded-2xl border border-slate-200 object-cover shadow-sm dark:border-slate-800" />
+  {% endif %}
+
+  <div class="mt-12 max-w-3xl space-y-4 leading-relaxed text-slate-600 dark:text-slate-400">
+    {{ project.description|linebreaks }}
+  </div>
+
+  {% if related_projects %}
+    <section class="mt-20 border-t border-slate-200/70 pt-14 dark:border-slate-800/70">
+      {% include "includes/section_header.html" with label="// projects_lainnya" title="Project Terkait" %}
+      <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {% for project in related_projects %}
+          {% include "includes/project_card.html" with project=project %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</article>
+{% endblock %}
