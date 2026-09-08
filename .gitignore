@@ -15,7 +15,11 @@ __pycache__/
 media/
 staticfiles/
 
-# Binary Tailwind standalone (diunduh lokal — JANGAN di-commit; app.css hasil build TETAP di-commit)
+# Log produksi
+error.log
+
+# Binary Tailwind standalone (diunduh lokal — JANGAN di-commit;
+# app.css hasil build TETAP di-commit karena server tidak build Tailwind)
 tailwindcss
 tailwindcss.exe
 
