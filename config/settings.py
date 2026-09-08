@@ -1,9 +1,9 @@
 """
 Pengaturan utama proyek PortfolioWeb.
 
-Seluruh nilai sensitif dibaca dari file `.env` di root proyek menggunakan
-django-environ. Pengaturan keamanan bersifat env-driven agar dapat diperketat
-saat production (HTTPS) tanpa mengubah kode.
+Nilai sensitif dibaca dari file `.env` menggunakan django-environ.
+Konfigurasi ini siap untuk development maupun production (cPanel/Passenger);
+perbedaan perilaku dikendalikan sepenuhnya oleh variabel lingkungan.
 """
 
 from datetime import timedelta
@@ -19,6 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
+    CSRF_TRUSTED_ORIGINS=(list, []),
     ADMIN_URL=(str, "admin/"),
     SECURE_SSL_REDIRECT=(bool, False),
     SECURE_PROXY_SSL=(bool, False),
@@ -34,6 +35,7 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 ADMIN_URL = env("ADMIN_URL")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
     # Aplikasi bawaan Django
@@ -59,6 +61,8 @@ MIDDLEWARE = [
     # Wajib paling atas: memblokir respons dari view yang terkunci oleh axes.
     "axes.middleware.AxesMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise: menyajikan file statis ter-kompresi dengan header cache permanen.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -90,17 +94,19 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # ---------------------------------------------------------------------------
 # Cache
-# LocMemCache cukup untuk hosting cPanel (proses tunggal). Dipisah antara
-# cache aplikasi (throttle kontak) dan cache axes agar tidak saling ganggu.
+# DatabaseCache dipakai karena Passenger menjalankan lebih dari satu proses;
+# cache in-memory (LocMemCache) bersifat per-proses sehingga throttle kontak
+# dan lockout axes tidak konsisten antar proses. Tabel cache dibuat via
+# `createcachetable`.
 # ---------------------------------------------------------------------------
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "portfolio-default",
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
     },
     "axes": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "portfolio-axes",
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
     },
 }
 
@@ -113,6 +119,28 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# ---------------------------------------------------------------------------
+# Static & Storage
+# WhiteNoise CompressedManifestStaticFilesStorage: gzip + nama file ber-hash
+# (cache busting permanen). Wajib `collectstatic` setiap kali deploy.
+# ---------------------------------------------------------------------------
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    },
+}
+
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Batas global payload request (perlindungan DoS dasar).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5 MB
 
 # ---------------------------------------------------------------------------
 # Autentikasi
@@ -153,7 +181,7 @@ SECURE_HSTS_SECONDS = env("SECURE_HSTS_SECONDS")
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 # Hanya aktif jika aplikasi berada di balik proxy yang selalu menyetel
-# header X-Forwarded-Proto (kondisi umum di cPanel/LiteSpeed dengan HTTPS).
+# header X-Forwarded-Proto (kondisi umum di cPanel dengan HTTPS).
 if env("SECURE_PROXY_SSL"):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -166,16 +194,37 @@ USE_I18N = True
 USE_TZ = True
 
 # ---------------------------------------------------------------------------
-# Static & Media
+# Logging
+# Error produksi (500, exception view) ditulis ke file di app root —
+# tidak memerlukan konfigurasi SMTP dan tetap terekam walau pengunjung
+# hanya melihat halaman 500 generik.
 # ---------------------------------------------------------------------------
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
-
-# Batas global payload request (perlindungan DoS dasar).
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5 MB
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} — {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "error_file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "error.log",
+            "formatter": "verbose",
+            "level": "ERROR",
+            "delay": True,
+        },
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ("error_file",),
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+    "root": {"handlers": ("error_file",), "level": "WARNING"},
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
